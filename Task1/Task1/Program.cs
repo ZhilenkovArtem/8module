@@ -42,10 +42,10 @@ namespace Task1
         /// <returns>необходимо удалить неиспользуемую директорию</returns>
         static bool DeleteOldFiles(DirectoryInfo directory)
         {
-            var files = directory.GetFiles();
-            foreach (var file in files)
+            try
             {
-                try
+                var files = directory.GetFiles();
+                foreach (var file in files)
                 {
                     if (CheckLastAccessOver30min(file.LastAccessTime))
                     {
@@ -53,15 +53,15 @@ namespace Task1
                         file.Delete();
                     }
                 }
-                catch
-                {
-                    throw new Exception($"Файл {file.FullName} не доступен");
-                }
             }
-            var directories = directory.GetDirectories();
-            foreach (var dir in directories)
+            catch
             {
-                try
+                throw new Exception($"Нет доступа к файлам директории {directory}");
+            }
+            try
+            {
+                var directories = directory.GetDirectories();
+                foreach (var dir in directories)
                 {
                     if (DeleteOldFiles(dir))
                     {
@@ -69,10 +69,10 @@ namespace Task1
                         dir.Delete();
                     }
                 }
-                catch
-                {
-                    throw new Exception($"Папка {dir.FullName} не доступна");
-                }
+            }
+            catch
+            {
+                throw new Exception($"Нет доступа к директориям папки {directory}");
             }
             var remainingFilesCount = directory.GetDirectories().Length + directory.GetFiles().Length;
             return remainingFilesCount == 0 ? true : false;
